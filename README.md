@@ -1,8 +1,5 @@
 # Rtype
 
-![example workflow](https://github.com/EpitechPromo2024/B-CPP-501-RUN-5-1-rtype-julien.pause/actions/workflows/build.yml/badge.svg)
-![example workflow](https://github.com/EpitechPromo2024/B-CPP-501-RUN-5-1-rtype-julien.pause/actions/workflows/tests.yml/badge.svg)
-
 ## Compiling
 ### Setup Conan
 - (linux) sudo pip3 install conan
