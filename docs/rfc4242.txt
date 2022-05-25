@@ -1,0 +1,265 @@
+Epitech Saint-André                                             J. Pause
+Request for Comments: 4242                                    L. Sautron
+Category: Standards Track                                     R. Grondin
+                                                            T. Bourgeois
+                                                                 Epitech
+                                                           November 2021
+
+                        R-Type Protocols
+
+Status of this Memo
+
+    This memo describe the R-type protocols: UDP and TCP.
+
+Table of Contents
+
+   1.   Introduction . . . . . . . . . . . . . . . . . . . . . . . . . 1
+   2.   Protocol description . . . . . . . . . . . . . . . . . . . . . 2
+   3.   TCP Protocol . . . . . . . . . . . . . . . . . . . . . . . . . 2
+   3a.   Header format . . . . . . . . . . . . . . . . . . . . . . . . 3
+   3b.   TCP Requests/Responses. . . . . . . . . . . . . . . . . . . . 3
+   4.   UDP Protocol . . . . . . . . . . . . . . . . . . . . . . . . . 6
+   4a.   Header format . . . . . . . . . . . . . . . . . . . . . . . . 6
+   4b.   UDP Requests/Responses. . . . . . . . . . . . . . . . . . . . 6
+
+1.  Introduction
+
+    R-type is an Epitech project aiming to create a clone of the arcade
+    game R-type in multiplayer. There can be up to four players per
+    games and there can be multiple games at the same time.
+
+    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+    "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in
+    this document are to be interpreted as described in RFC 2119.
+
+2.  Protocol description
+
+    The network part is divided in two parts. Firstly, when a client
+    needs to go in a room. Secondly when he is playing with others in
+    a game.
+
+    When joining/creating a room a TCP protocol MUST be used. for the
+    game itself, informations MUST be sent with UDP protocol. Both
+    parts SHOULD communicate with binary payloads.
+
+3.  TCP Protocol
+
+    Every request MUST be composed of a header and an OPTIONAL body
+    unless specified otherwise.
+
+
+
+
+
+
+
+
+
+Pause                       Standards Track                     [Page 1]
+
+RFC 4242                    R-Type Protocols               November 2021
+
+
+    3a.   Header format
+
+        The header contains these two meta-datas:
+
+        TCP_CODE ACTION_CODE;
+        size_t PACK_SIZE;
+
+        Here are the diffetent codes :
+
+        enum TCP_CODE {
+            CREATE_ROOM,
+            JOIN_ROOM,
+            READY_UP,
+            START_GAME,
+            END_GAME,
+            DISCONNECTED
+        }
+
+        The header size MUST be coded on 6 bytes.
+
+        The size of CODE is 2 bytes.
+        The size of SIZE is 4 bytes.
+        A typical TCP header packet will look like this :
+
+        0                   1                   2                   3
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       |                  CODE                   |                   |
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                   |
+       |                          PCK_SIZE                           |
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        A body string encoded on 16 characters (including \0) which
+        means 16 bytes.
+
+    3b. TCP Requests/Responses
+
+        CREATE_ROOM request :
+
+        Sends the name of the room to the server.
+
+        CREATE_ROOM response :
+
+        Sends the id of the room to the client if the creation
+        was successful. If it wasn't, the body will have -1 in it.
+
+
+
+
+
+
+
+
+
+Pause                       Standards Track                     [Page 2]
+
+RFC 4242                    R-Type Protocols               November 2021
+
+
+        JOIN_ROOM request :
+
+        Sends a packet with a body with name of the room to be joined.
+
+        JOIN_ROOM response :
+
+        Sends a packet with a body response, the id of the room
+        will be sent if joining was successful, otherwise -1 will be
+        sent.
+
+        READY_UP request :
+
+        No body required.
+        If the client was already ready, he is not ready anymore.
+
+        READY_UP response :
+
+        Sends to all clients within the same room that a player has set
+        himself as ready or unready depending on its previous state.
+
+        START_GAME response :
+
+        This code is a response only. When half of the players of a room
+        are ready, send to all players that the game is about to start.
+
+        END_GAME response :
+
+        This code is a response only. This response will be accompanied
+        by a body to describe which type of END_GAME the response is.
+        The body can be either of these parameters :
+
+        - true : Say to the clients that they won their game.
+
+        - false : Say to the clients that they lost their game.
+
+        DISCONNECTED request :
+
+        Send to the server that a client disconnected from a
+        game.
+
+        DISCONNECTED response :
+
+        Sends to all the clients in the game that a client disconnected
+        from the game.
+
+4.  UDP protocol
+
+    The UDP protocol takes part in the game aspect of this project.
+    It will be used when clients will send informations about their
+    actions or the ennemy's actions.
+
+
+
+
+Pause                       Standards Track                     [Page 3]
+
+RFC 4242                    R-Type Protocols               November 2021
+
+    4a. Header format
+
+        The header contains those two metadata :
+
+        UDP_CODE ACTION_CODE;
+        size_t PACK_SIZE;
+
+        Here are the diffetent codes :
+
+        enum UDP_CODE {
+            MOVE,
+            SHOOT,
+            KILL,
+            DIE
+        }
+
+        The header size MUST be coded on 6 bytes.
+
+        The size of CODE is 2 bytes.
+        The size of SIZE is 4 bytes.
+        A typical TCP header packet will look like this :
+
+         0                   1                   2                   3
+        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       |                  CODE                   |                   |
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                   |
+       |                          PCK_SIZE                           |
+       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        A body string encoded on 16 characters (including \0) which
+        means 16 bytes.
+
+    4b. UDP Requests/Responses
+
+        MOVE request :
+
+        Sends a packet with a body with current position of the player
+        and the direction.
+        The body should be like this:
+            X:Y:DIRECTION
+
+        directions: {
+            UP,
+            DOWN,
+            LEFT,
+            RIGHT,
+            NONE
+        }
+
+Pause                       Standards Track                     [Page 4]
+
+RFC 4242                    R-Type Protocols               November 2021
+
+        MOVE response :
+
+        Sends to all clients in the room the MOVE event with a body like
+        this:
+            X:Y:DIRECTION:PLAYER_ID
+
+        SHOOT request :
+
+        Sends a packet with a body with current position of the player:
+        X:Y
+
+        SHOOT response :
+
+        Sends to all clients in the room the SHOOT event with this body:
+            X:Y:PLAYER_ID
+
+        KILL request :
+
+        Sends a packet with a body with the id of the ennemy killed
+
+        KILL response :
+
+        Sends to all clients in the room the KILL event with this body:
+            ENNEMY_ID:PLAYER_ID
+
+        DIE: request :
+
+        No body required.
+
+        DIE response:
+
+        Sends to all clients a body with the id of the client who died.
